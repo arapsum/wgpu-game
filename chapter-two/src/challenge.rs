@@ -1,5 +1,3 @@
-pub mod challenge;
-
 use std::sync::Arc;
 
 use winit::{
@@ -23,6 +21,7 @@ struct State {
     config: wgpu::SurfaceConfiguration,
     queue: wgpu::Queue,
     is_surface_configured: bool,
+    clear_color: wgpu::Color,
 }
 
 impl State {
@@ -88,12 +87,20 @@ impl State {
             desired_maximum_frame_latency: 2,
         };
 
+        let clear_color = wgpu::Color {
+            r: 0.1,
+            g: 0.2,
+            b: 0.3,
+            a: 1.0,
+        };
+
         Ok(Self {
             window,
             surface,
             device,
             queue,
             config,
+            clear_color,
             is_surface_configured: false,
         })
     }
@@ -112,6 +119,13 @@ impl State {
             (KeyCode::Escape, true) => event_loop.exit(),
             _ => {}
         }
+    }
+
+    fn handle_mouse_event(&mut self, x: f64, y: f64) {
+        self.clear_color.r = x / self.config.width as f64;
+        self.clear_color.g = y / self.config.height as f64;
+        self.clear_color.a = (x + y) / (self.config.width + self.config.height) as f64;
+
     }
 
     fn update(&mut self) {
@@ -166,12 +180,7 @@ impl State {
                     resolve_target: None,
                     depth_slice: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
+                        load: wgpu::LoadOp::Clear(self.clear_color),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
@@ -306,6 +315,7 @@ impl ApplicationHandler<State> for App {
                     },
                 ..
             } => state.handle_key(event_loop, code, key_state.is_pressed()),
+            WindowEvent::CursorMoved { position, ..} => state.handle_mouse_event(position.x, position.y),
             _ => {}
         }
     }
@@ -332,15 +342,6 @@ pub fn run() -> anyhow::Result<()> {
         let app = App::new(&event_loop);
         event_loop.spawn_app(app);
     }
-
-    Ok(())
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen(start)]
-pub fn run_web() -> Result<(), wasm_bindgen::JsValue> {
-    console_error_panic_hook::set_once();
-    run().unwrap_throw();
 
     Ok(())
 }
