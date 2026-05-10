@@ -1,20 +1,29 @@
-[workspace]
-resolver = "3"
-members = ["chapter-one", "chapter-two"]
+[package]
+name = "chapter-two"
+version = "0.1.0"
+edition = "2024"
+metadata.workspace = true
 
-[profile.release]
-strip = true
+[[bin]]
+name = "two"
+path = "src/bin/main.rs"
 
-[workspace.dependencies]
+[lib]
+name = "two"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
 anyhow = "1.0.102"
 env_logger = "0.11.10"
 log = "0.4.29"
 pollster = "0.4.0"
 wgpu = "29.0.3"
 winit = { version = "0.30.13", features = ["android-native-activity"] }
+wasm-bindgen = "0.2.121"
 
 
-[workspace.target.'cfg(target_arch = "wasm32")'.dependencies]
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"
 console_log = "1.0"
 wgpu = { version = "29.0.3", features = ["webgl"]}
@@ -25,6 +34,3 @@ web-sys = { version = "0.3", features = [
     "Window",
     "Element",
 ]}
-
-[workspace.package.metadata.wasm-pack.profile.release]
-wasm-opt = false

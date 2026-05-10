@@ -2,6 +2,7 @@
 name = "chapter-one"
 version = "0.1.0"
 edition = "2024"
+metadata.workspace = true
 
 [[bin]]
 name = "one"
